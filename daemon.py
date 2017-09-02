@@ -261,6 +261,11 @@ def AllInline(bot, update):
         update.callback_query.message.reply_text("Kommando nicht erkannt")
         bot.sendMessage(text="Inlinekommando nicht erkannt.\n\nData: " + update.callback_query.data + "\n User: " + str(update.callback_query.message.chat), chat_id=config['DEFAULT']['AdminId'])
 
+def About(bot, update):
+    usr = CheckUser(bot, update)
+    send_or_edit(bot, update, "Dieser Bot wurde erstellt von @Alwinius. Der Quellcode ist unter https://github.com/Alwinius/mydealzbot verfügbar.\nWeitere interessante Bots: \n - @tummoodlebot\n - @tummensabot")
+    ShowHome(bot, update, usr)
+
 def Msg(bot, update):
     usr = CheckUser(bot, update)
     args = usr.current_selection.split("$")
@@ -276,6 +281,8 @@ def Msg(bot, update):
 
 start_handler = CommandHandler('start', Start)
 dispatcher.add_handler(start_handler)
+about_handler = CommandHandler('about', About)
+dispatcher.add_handler(about_handler)
 
 inlinehandler = CallbackQueryHandler(AllInline)
 dispatcher.add_handler(inlinehandler)
