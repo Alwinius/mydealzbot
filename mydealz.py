@@ -31,7 +31,8 @@ keywords = s.query(Keywords).all()
 bot = telegram.Bot(token=config['DEFAULT']['BotToken'])
 
 
-def send(chat_id, message, alertid, s):
+def send(chat_id, message, alertid, s, tryy=0):
+    tryy+=1
     button_list = [[InlineKeyboardButton("🏠 Home", callback_data="0"),
                     InlineKeyboardButton("📜 Übersicht", callback_data="1$" + str(alertid)),
                     InlineKeyboardButton("💣 Diese Benachrichtigung löschen",
@@ -45,9 +46,10 @@ def send(chat_id, message, alertid, s):
         s.commit()
         return True
     except TimedOut:
-        return send(chat_id, message, alertid, s)
+        if tryy < 10:
+            return send(chat_id, message, alertid, s)
     except ChatMigrated as e:
-        user = s.query(User).filter(User.id == user_id).first()
+        user = s.query(User).filter(User.id == chat_id).first()
         user.id = e.new_chat_id
         s.commit()
         return True
@@ -56,7 +58,7 @@ def send(chat_id, message, alertid, s):
 f = open("lastentry.txt", "r+")
 lastentry = datetime.fromtimestamp(float(f.read()))
 
-d = feedparser.parse("https://www.mydealz.de/rss/all")
+d = feedparser.parse("https://www.mydealz.de/rss/alle")
 
 counter = 0
 while len(d.entries) > counter and lastentry < datetime.strptime(d.entries[counter].published[:-6], '%a, %d %b %Y %X'):
@@ -81,5 +83,9 @@ while len(d.entries) > counter and lastentry < datetime.strptime(d.entries[count
                 send(keywordentry.user_id, message, keywordentry.id, s)
     counter += 1
 f.seek(0, 0)
-f.write(datetime.strptime(d.entries[0].published[:-6], '%a, %d %b %Y %X').strftime("%s"))
+if len(d.entries) > 0:
+    f.write(datetime.strptime(d.entries[0].published[:-6], '%a, %d %b %Y %X').strftime("%s"))
+    print("Updated lastentry")
+else:
+    bot.sendMessage(chat_id=config['DEFAULT']['AdminId'], text="MyDealz RSS hat keine Einträge.")
 f.close()
