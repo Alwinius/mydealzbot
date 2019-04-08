@@ -1,0 +1,10 @@
+
+/__pycache__
+
+*.pyc
+
+/venv
+
+/config.ini
+
+/mydealz.sqlite

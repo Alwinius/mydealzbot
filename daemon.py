@@ -207,6 +207,9 @@ def SaveMaxPrice(bot, update, usr, alertid):
 
 def SaveKeywords(bot, update, usr, alertid=None):
     # split keywords and check
+    if update.message.text is None:
+        send_or_edit(bot, update, "Bitte mit einem Text antworten")
+        return
     keywords = update.message.text.split(",")
     for keyw in keywords:
         keyw = keyw.strip()

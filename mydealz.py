@@ -10,7 +10,7 @@ from db import User
 import feedparser
 import re
 import html
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, exists
 from sqlalchemy.orm import sessionmaker
 import telegram
 from telegram import InlineKeyboardButton
@@ -50,7 +50,14 @@ def send(chat_id, message, alertid, s, tryy=0):
             return send(chat_id, message, alertid, s)
     except ChatMigrated as e:
         user = s.query(User).filter(User.id == chat_id).first()
-        user.id = e.new_chat_id
+        newuserexists = s.query(exists().where(User.id == e.new_chat_id)).scalar()
+        if not newuserexists:
+            user.id = e.new_chat_id
+        else:
+            user.delete()
+        userkeywords = s.query(Keywords).filter(Keywords.user_id == chat_id)
+        for keyword in userkeywords:
+            keyword.user_id = e.new_chat_id
         s.commit()
         return True
 
@@ -64,10 +71,16 @@ counter = 0
 while len(d.entries) > counter and lastentry < datetime.strptime(d.entries[counter].published[:-6], '%a, %d %b %Y %X'):
     print(d.entries[counter].title)
     try:
-        price = d.entries[counter].pepper_merchant["price"].replace(".", "")
+        raw_price = d.entries[counter].pepper_merchant["price"]
+        price = raw_price.replace(".", "")
+        price_string = " [" + raw_price + "]"
         price = float(price.replace(",", ".")[:-1])
     except (KeyError, AttributeError):
         price = 0
+        try:
+            price_string = " [-" + d.entries[counter].pepper_merchant["discount"] + "]"
+        except (KeyError, AttributeError):
+            price_string = ""
     try:
         category = d.entries[counter].category
     except AttributeError:
@@ -79,13 +92,12 @@ while len(d.entries) > counter and lastentry < datetime.strptime(d.entries[count
                     and (keywordentry.category == category or keywordentry.category == "Alle") and (
                     keywordentry.maxprice == 0 or keywordentry.maxprice > price):
                 # Match found
-                message = "Neuer Deal: <a href='" + d.entries[counter].link + "'>" + html.escape(d.entries[counter].title) + "</a>\n"
+                message = "Neuer Deal: <a href='" + d.entries[counter].link + "'>" + html.escape(d.entries[counter].title) + "</a>" + price_string + "\n"
                 send(keywordentry.user_id, message, keywordentry.id, s)
+                break  # notify only once if multiple keywords of the same entry match
     counter += 1
 f.seek(0, 0)
 if len(d.entries) > 0:
     f.write(datetime.strptime(d.entries[0].published[:-6], '%a, %d %b %Y %X').strftime("%s"))
     print("Updated lastentry")
-else:
-    bot.sendMessage(chat_id=config['DEFAULT']['AdminId'], text="MyDealz RSS hat keine Einträge.")
 f.close()
