@@ -1,0 +1,10 @@
+.git
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env
+config.ini
+mydealz.sqlite
+lastentry.txt

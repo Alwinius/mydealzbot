@@ -1,0 +1,16 @@
+name: Publish Docker
+on:
+  push:
+    branches: 
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build and push Docker Image
+      run: |
+        REPO=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
+        docker build . -t docker.pkg.github.com/${REPO}/mydealzbot
+        echo ${{ secrets.GITHUB_TOKEN }} | docker login -u ${GITHUB_ACTOR} --password-stdin docker.pkg.github.com
+        docker push docker.pkg.github.com/${REPO}/mydealzbot

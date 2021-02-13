@@ -130,9 +130,10 @@ def ShowAlert(bot, update, keyword):
 
 
 def SetCategory(bot, update, keyword, value=None):
-    categories = ["Alle", "Fashion & Accessoires", "Elektronik", "Entertainment", "Home & Living", "Dies & Das",
-                  "Reisen", "Food", "Apps & Software", "TV & HiFi", "Verträge und Finanzen", "Beauty", "Coupons",
-                  "Handy & Tablets", "Freebies", "Family & Kids"]
+    categories = ["Alle", "Fashion & Accessoires", "Family & Kids", "Reisen", "Versicherung & Finanzen",
+                  "Telefon- und Internet-Verträge", "Kultur & Freizeit", "Gaming", "Beauty & Gesundheit",
+                  "Lebensmittel & Haushalt", "Home & Living", "Sport & Outdoor", "Auto & Motorrad",
+                  "Dienstleistungen & Verträge", "Elektronik", "Alle"]
     button_list = [[InlineKeyboardButton("🏠 Home", callback_data="0")]]
     if value is None:
         message = "Bitte neue Kategorie für die Benachrichtigung '" + keyword.keywords + "' auswählen:"

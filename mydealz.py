@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # created by Alwin Ebermann (alwin@alwin.net.au)
 
@@ -18,6 +18,7 @@ from telegram import InlineKeyboardMarkup
 from telegram.error import ChatMigrated
 from telegram.error import TimedOut
 from telegram.error import Unauthorized
+from telegram.error import BadRequest
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -60,6 +61,13 @@ def send(chat_id, message, alertid, s, tryy=0):
             keyword.user_id = e.new_chat_id
         s.commit()
         return True
+    except BadRequest as e:
+        if str(e) == "Chat not found":
+            user = s.query(User).filter(User.id == chat_id).first()
+            user.notifications = False
+            s.commit()
+        else:
+            raise BadRequest(str(e))
 
 
 f = open("lastentry.txt", "r+")
