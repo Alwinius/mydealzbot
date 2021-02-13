@@ -1,11 +1,10 @@
-# environment variables are resolved from the .env file (which is not part of the git repository)
 version: "3"
 services:
   mydealz:
     image: docker.pkg.github.com/alwinius/mydealzbot/mydealzbot:latest
     restart: always
     ports:
-      - "127.0.0.1:${PORT}:8080"
+      - "127.0.0.1:4211:8080"
     volumes:
       - ${PWD}/mydealz.sqlite:/app/mydealz.sqlite
       - ${PWD}/config.ini:/app/config.ini
