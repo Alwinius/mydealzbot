@@ -31,7 +31,7 @@ engine = create_engine('sqlite:///mydealz.sqlite')
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 
-updater = Updater(token=config['DEFAULT']['BotToken'])
+updater = Updater(token=config['DEFAULT']['BotToken'], use_context=False)
 dispatcher = updater.dispatcher
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
