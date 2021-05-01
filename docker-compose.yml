@@ -3,6 +3,8 @@ services:
   mydealz:
     image: docker.pkg.github.com/alwinius/mydealzbot/mydealzbot:latest
     restart: always
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     ports:
       - "127.0.0.1:4211:8080"
     volumes:
